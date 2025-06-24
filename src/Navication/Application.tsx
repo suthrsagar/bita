@@ -12,7 +12,7 @@ const MainTabs = () => (
       tabBarIcon: ({ color, size }) => {
         const icons: Record<string, string> = {
           Explore: 'home',
-          Login: 'user', // optional
+          Login: 'user', 
         };
         return <FontAwesome name={icons[route.name] || 'circle'} size={size} color={color} />;
       },
