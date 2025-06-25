@@ -4,19 +4,18 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   Text,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-
-export default function SettingsScreen() {
+import LoginScreen from './LoginScreen';
+const Mange = ({ navigation }) => {
   return (
     <View style={styles.container}>
-    
-      <View style={styles.header}>``
+      {/* Header */}
+      <View style={styles.header}>
         <Image
-          source={require('../../../assets/images/logo1.png')}  
+          source={require('../../../assets/images/logo1.png')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -30,13 +29,44 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-     
+      {/* Menu Items */}
       <ScrollView contentContainerStyle={{ padding: 15 }}>
-c
-
-        
         <View style={styles.menu}>
-          {['Account Settings', 'My Posts', 'Login', 'Register , '].map((item, index) => (
+          {/* Navigate to Account Settings */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('AccountSetting')}
+          >
+            <Text style={styles.menuText}>Account Settings</Text>
+            <Icon name="chevron-forward-outline" size={20} color="#888" />
+          </TouchableOpacity>
+  <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('App Setting')}
+          >
+            <Text style={styles.menuText}>App Setting</Text>
+            <Icon name="chevron-forward-outline" size={20} color="#888" />
+          </TouchableOpacity>
+  <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('Mypost')}
+          >
+            <Text style={styles.menuText}>Mypost</Text>
+            <Icon name="chevron-forward-outline" size={20} color="#888" />
+          </TouchableOpacity>
+
+
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('LoginScreen')}
+          >
+            <Text style={styles.menuText}>Login</Text>
+            <Icon name="chevron-forward-outline" size={20} color="#888" />
+          </TouchableOpacity>
+         
+          {/* Other static options */}
+          {[' '].map((item, index) => (
             <TouchableOpacity key={index} style={styles.menuItem}>
               <Text style={styles.menuText}>{item}</Text>
               <Icon name="chevron-forward-outline" size={20} color="#888" />
@@ -46,12 +76,14 @@ c
       </ScrollView>
     </View>
   );
-}
+};
 
-
- 
+export default Mange;
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
 
   header: {
     height: 60,
@@ -67,36 +99,26 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     zIndex: 10,
   },
-  logo: { width: 120, height: 55 },
 
-  iconContainer: { flexDirection: 'row' },
-  iconButton: { marginLeft: 15 },
+  logo: {
+    width: 120,
+    height: 55,
+  },
 
-  inputRow: {
+  iconContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 10,
-    marginTop: 10,
-    marginBottom: 15,
   },
-  inputWrapper: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: 'gray',
-    borderWidth: 2,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#fff',
-    marginRight: 10,
+
+  iconButton: {
+    marginLeft: 15,
   },
-  inputIcon: { marginRight: 8 },
-  textInput: { flex: 1, height: 40, color: 'black' },
 
   menu: {
     marginTop: 20,
     borderTopWidth: 1,
     borderTopColor: '#eee',
   },
+
   menuItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -105,6 +127,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
+
   menuText: {
     fontSize: 16,
     color: '#333',
