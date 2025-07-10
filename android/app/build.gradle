@@ -54,11 +54,15 @@ react {
     /* Autolinking */
     autolinkLibrariesWithApp()
 }
-
+project.ext.react = [
+    entryFile: "index.js",
+    enableHermes: true,  // clean and rebuild if changing
+]
+def enableSeparateBuildPerCPUArchitecture = false
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -72,39 +76,35 @@ def enableProguardInReleaseBuilds = false
  * this variant is about 6MiB larger per architecture than default.
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
+def enableHermes = project.ext.react.get("enableHermes", true);
 
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
-
+    externalNativeBuild {
+        cmake {
+            version "3.22.1"
+        }
+    }
     namespace "com.bita"
     defaultConfig {
         applicationId "com.bita"
         minSdkVersion rootProject.ext.minSdkVersion
+        vectorDrawables.useSupportLibrary = true
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
     }
-    signingConfigs {
-    release {
-        if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
-            storeFile file(MYAPP_UPLOAD_STORE_FILE)
-            storePassword MYAPP_UPLOAD_STORE_PASSWORD
-            keyAlias MYAPP_UPLOAD_KEY_ALIAS
-            keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+     splits {
+        abi {
+            reset()
+            enable enableSeparateBuildPerCPUArchitecture
+            universalApk false  // If true, also generate a universal APK
+            // include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+            include "arm64-v8a"
         }
     }
-}
-buildTypes {
-    release {
-        signingConfig signingConfigs.release
-        minifyEnabled false
-        shrinkResources false
-        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-    }
-}
-
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -112,7 +112,24 @@ buildTypes {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+           release {
+            storeFile file('sagar.keystore')
+            storePassword '123456'
+            keyAlias 'sagar'
+            keyPassword '123456'
+          
+         }
     }
+    // signingConfigs {
+    // release {
+    //     if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+    //         storeFile file(MYAPP_UPLOAD_STORE_FILE)
+    //         storePassword MYAPP_UPLOAD_STORE_PASSWORD
+    //         keyAlias MYAPP_UPLOAD_KEY_ALIAS
+    //         keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+    //     }
+    // }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -120,11 +137,18 @@ buildTypes {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            debuggable false
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
+            shrinkResources true
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+     aaptOptions {
+        cruncherEnabled = false
+    }
+   
+
 }
 
 dependencies {
