@@ -12,7 +12,7 @@ import LoginScreen from './LoginScreen';
 const Mange = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      {/* Header */}
+
       <View style={styles.header}>
         <Image
           source={require('../../../assets/images/logo1.png')}
@@ -29,10 +29,10 @@ const Mange = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Menu Items */}
+
       <ScrollView contentContainerStyle={{ padding: 15 }}>
         <View style={styles.menu}>
-          {/* Navigate to Account Settings */}
+
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => navigation.navigate('AccountSetting')}
@@ -40,16 +40,16 @@ const Mange = ({ navigation }) => {
             <Text style={styles.menuText}>Account Settings</Text>
             <Icon name="chevron-forward-outline" size={20} color="#888" />
           </TouchableOpacity>
-  <TouchableOpacity
+          <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => navigation.navigate('App Setting')}
+            onPress={() => navigation.navigate('Settings')}
           >
             <Text style={styles.menuText}>App Setting</Text>
             <Icon name="chevron-forward-outline" size={20} color="#888" />
           </TouchableOpacity>
-  <TouchableOpacity
+          <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => navigation.navigate('Mypost')}
+            onPress={() => navigation.navigate('MyPosts')}
           >
             <Text style={styles.menuText}>Mypost</Text>
             <Icon name="chevron-forward-outline" size={20} color="#888" />
@@ -64,14 +64,7 @@ const Mange = ({ navigation }) => {
             <Text style={styles.menuText}>Login</Text>
             <Icon name="chevron-forward-outline" size={20} color="#888" />
           </TouchableOpacity>
-         
-          {/* Other static options */}
-          {[' '].map((item, index) => (
-            <TouchableOpacity key={index} style={styles.menuItem}>
-              <Text style={styles.menuText}>{item}</Text>
-              <Icon name="chevron-forward-outline" size={20} color="#888" />
-            </TouchableOpacity>
-          ))}
+
         </View>
       </ScrollView>
     </View>

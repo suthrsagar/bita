@@ -1,31 +1,44 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  FlatList,
   Image,
   StyleSheet,
-  TextInput,
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { categories, products } from './seedData';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
-export default function GroceryHomeScreen() {
+export default function RoomHomeScreen({ route }) {
+  const [roomList, setRoomList] = useState([]);
+  const navigation = useNavigation();
+
+  useFocusEffect(
+    useCallback(() => {
+      const newRoom = route.params?.newRoom;
+
+      if (newRoom) {
+        const alreadyExists = roomList.some(
+          (room) => room.name === newRoom.name && room.image === newRoom.image
+        );
+        if (!alreadyExists) {
+          setRoomList((prev) => [newRoom, ...prev]);
+        }
+      }
+    }, [route.params?.newRoom])
+  );
+
   return (
     <View style={styles.container}>
-      <Header />
-      <SearchBar />
-      <Text style={styles.sectionTitle}>Shop by Category</Text>
-      <CategoryList data={categories} />
-      <Text style={styles.sectionTitle}>Top Picks</Text>
-      <ProductList data={products} />
+      <Header onAddPress={() => navigation.navigate('AddRoom')} />
+      <Text style={styles.sectionTitle}>Available Rooms</Text>
+      <RoomList data={roomList} />
     </View>
   );
 }
 
-function Header() {
+function Header({ onAddPress }) {
   return (
     <View style={styles.header}>
       <Image
@@ -40,57 +53,31 @@ function Header() {
         <TouchableOpacity style={styles.iconButton}>
           <Icon name="notifications-outline" size={27} color="orange" />
         </TouchableOpacity>
+        <TouchableOpacity onPress={onAddPress} style={styles.iconButton}>
+          <Icon name="add-circle-outline" size={27} color="orange" />
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-function SearchBar() {
-  return (
-    <View style={styles.searchContainer}>
-      <Icon name="search-outline" size={20} color="#888" style={styles.searchIcon} />
-      <TextInput
-        placeholder="Search groceries..."
-        placeholderTextColor="#888"
-        style={styles.searchInput}
-      />
-    </View>
-  );
-}
+function RoomList({ data }) {
+  if (data.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No rooms added yet.</Text>
+      </View>
+    );
+  }
 
-function CategoryList({ data }) {
   return (
-    <FlatList
-      horizontal
-      data={data}
-      keyExtractor={(item) => item.name}
-      contentContainerStyle={styles.categoryList}
-      showsHorizontalScrollIndicator={false}
-      renderItem={({ item }) => (
-        <View style={styles.categoryCard}>
-          <Image source={{ uri: item.image }} style={styles.categoryImage} />
-          <Text style={styles.categoryName}>{item.name}</Text>
-        </View>
-      )}
-    />
-  );
-}
-
-function ProductList({ data }) {
-  return (
-    <ScrollView contentContainerStyle={styles.productsWrapper}>
-      {data.map((product, index) => (
-        <View key={index} style={styles.productCard}>
-          <Image source={{ uri: product.image }} style={styles.productImage} />
-          <Text style={styles.productName}>{product.name}</Text>
-          <Text style={styles.productQuantity}>{product.quantity}</Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.discountPrice}>₹{product.discountPrice}</Text>
-            <Text style={styles.actualPrice}>₹{product.price}</Text>
-          </View>
-          <TouchableOpacity style={styles.addButton}>
-            <Text style={styles.addText}>Add</Text>
-          </TouchableOpacity>
+    <ScrollView contentContainerStyle={styles.roomList}>
+      {data.map((room, index) => (
+        <View key={index} style={styles.roomCard}>
+          <Image source={{ uri: room.image }} style={styles.roomImage} />
+          <Text style={styles.roomName}>{room.name}</Text>
+          <Text style={styles.roomCapacity}>{room.quantity}</Text>
+          <Text style={styles.roomPrice}>₹{room.price}/night</Text>
         </View>
       ))}
     </ScrollView>
@@ -98,9 +85,8 @@ function ProductList({ data }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingTop: 0 },
+  container: { flex: 1, backgroundColor: '#fff' },
 
-  
   header: {
     height: 60,
     flexDirection: 'row',
@@ -109,29 +95,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#fff',
     elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    zIndex: 10,
   },
   logo: { width: 120, height: 55 },
   iconContainer: { flexDirection: 'row' },
   iconButton: { marginLeft: 15 },
-
-  searchContainer: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    marginHorizontal: 15,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  searchIcon: { marginRight: 6 },
-  searchInput: { flex: 1, height: 40, color: '#333' },
 
   sectionTitle: {
     fontSize: 18,
@@ -142,79 +109,50 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 
-  categoryList: { paddingLeft: 15, paddingRight: 10 },
-  categoryCard: {
-    width: 80,
-    marginRight: 12,
-    alignItems: 'center',
-  },
-  categoryImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginBottom: 6,
-    backgroundColor: '#f5f5f5',
-  },
-  categoryName: {
-    fontSize: 12,
-    textAlign: 'center',
-    color: '#444',
-  },
-
-  productsWrapper: {
+  roomList: {
     paddingHorizontal: 15,
-    paddingBottom: 40,
+    paddingBottom: 30,
   },
-  productCard: {
+  roomCard: {
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
-    padding: 10,
+    padding: 12,
     marginBottom: 15,
     borderWidth: 1,
     borderColor: '#eee',
   },
-  productImage: {
+  roomImage: {
     width: '100%',
-    height: 140,
+    height: 150,
     borderRadius: 8,
-    resizeMode: 'contain',
+    resizeMode: 'cover',
   },
-  productName: {
-    fontSize: 14,
+  roomName: {
+    fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 6,
+    marginTop: 8,
     color: '#333',
   },
-  productQuantity: {
-    fontSize: 12,
+  roomCapacity: {
+    fontSize: 13,
     color: '#777',
     marginTop: 2,
   },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  roomPrice: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#4CAF50',
     marginTop: 5,
   },
-  discountPrice: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#000',
-    marginRight: 8,
-  },
-  actualPrice: {
-    fontSize: 13,
-    color: '#999',
-    textDecorationLine: 'line-through',
-  },
-  addButton: {
-    backgroundColor: '#ff9900',
-    borderRadius: 5,
-    paddingVertical: 6,
-    marginTop: 10,
+
+  emptyContainer: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 60,
   },
-  addText: {
-    color: '#fff',
-    fontWeight: '600',
+  emptyText: {
+    fontSize: 16,
+    color: '#888',
   },
 });

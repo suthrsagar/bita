@@ -1,169 +1,145 @@
 import React, { useState } from 'react';
 import {
   View,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
   Text,
-  KeyboardAvoidingView,
-  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Linking,
+  ScrollView,
+  Alert
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 
-export default function AppHeaderWithChat() {
-  const [inputText, setInputText] = useState('');
-  const [messages, setMessages] = useState([
-    { id: 1, text: 'Hi there!', sender: 'other' },
-    { id: 2, text: 'Hello! How can I help you?', sender: 'me' },
-  ]);
+const HelpScreen = ({ navigation }) => {
+  const [complaint, setComplaint] = useState('');
 
-  const handleSend = () => {
-    if (inputText.trim() === '') return;
+ const contactEmail = 'sutharsagar710@gmail.com';
+  const contactPhone = '+91 8905730102';
+  const openPhone = () => {
+    Linking.openURL(`tel:${contactPhone}`);
+  };
 
-    const newMessage = {
-      id: messages.length + 1,
-      text: inputText,
-      sender: 'me',
-    };
+  const openEmail = () => {
+    Linking.openURL(`mailto:${contactEmail}`);
+  };
 
-    setMessages([...messages, newMessage]);
-    setInputText('');
+  const openSMS = () => {
+    const message = 'Hello, I need help with...';
+    Linking.openURL(`sms:${contactPhone}?body=${encodeURIComponent(message)}`);
+  };
+
+  const handleComplaintSubmit = () => {
+    if (!complaint.trim()) {
+      Alert.alert('Error', 'Please enter your complaint.');
+      return;
+    }
+
+    Alert.alert('Submitted', 'Your complaint has been submitted.');
+    setComplaint('');
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Image
-          source={require('../../../assets/images/logo1.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <View style={styles.iconContainer}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Icon name="help-circle-outline" size={27} color="orange" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Icon name="notifications-outline" size={27} color="orange" />
-          </TouchableOpacity>
-        </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Help & Support</Text>
+      <Text style={styles.description}>
+        If you're experiencing any issues, feel free to contact us or submit a complaint below.
+      </Text>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Contact Customer Care</Text>
+
+        <TouchableOpacity style={styles.contactButton} onPress={openPhone}>
+          <Text style={styles.contactText}>📞 Call Us: {contactPhone}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.contactButton} onPress={openEmail}>
+          <Text style={styles.contactText}>📧 Email: {contactEmail}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.contactButton} onPress={openSMS}>
+          <Text style={styles.contactText}>📱 Send SMS to Support</Text>
+        </TouchableOpacity>
+ 
       </View>
 
-      {/* Chat Area */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.chatContainer}
-        keyboardVerticalOffset={80}
-      >
-        <ScrollView style={styles.messageList}>
-          {messages.map((msg) => (
-            <View
-              key={msg.id}
-              style={[
-                styles.messageBubble,
-                msg.sender === 'me' ? styles.myMessage : styles.otherMessage,
-              ]}
-            >
-              <Text style={styles.messageText}>{msg.text}</Text>
-            </View>
-          ))}
-        </ScrollView>
-
-        <View style={styles.messageInputRow}>
-          <TextInput
-            style={styles.messageInput}
-            placeholder="Type a message..."
-            value={inputText}
-            onChangeText={setInputText}
-            placeholderTextColor="gray"
-          />
-          <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
-            <Icon name="send" size={20} color="white" />
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Submit a Complaint</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Write your complaint here..."
+          multiline
+          numberOfLines={5}
+          value={complaint}
+          onChangeText={setComplaint}
+        />
+        <TouchableOpacity style={styles.submitButton} onPress={handleComplaintSubmit}>
+          <Text style={styles.submitText}>Submit Complaint</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    padding: 20,
+    backgroundColor: '#f7f8fa',
+    flexGrow: 1,
   },
-  header: {
-    height: 60,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    backgroundColor: '#fff',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    zIndex: 10,
-  },
-  logo: {
-    width: 120,
-    height: 55,
-  },
-  iconContainer: {
-    flexDirection: 'row',
-  },
-  iconButton: {
-    marginLeft: 15,
-  },
-
-  chatContainer: {
-    flex: 1,
-    padding: 10,
-    paddingBottom: 15,
-  },
-  messageList: {
-    flex: 1,
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#333',
     marginBottom: 10,
   },
-  messageBubble: {
-    padding: 10,
-    borderRadius: 10,
+  description: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
     marginBottom: 10,
-    maxWidth: '80%',
+    color: '#444',
   },
-  myMessage: {
-    backgroundColor: '#DCF8C6',
-    alignSelf: 'flex-end',
+  contactButton: {
+    backgroundColor: '#ffffff',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    elevation: 1,
   },
-  otherMessage: {
-    backgroundColor: '#eee',
-    alignSelf: 'flex-start',
+  contactText: {
+    fontSize: 16,
+    color: '#333',
   },
-  messageText: {
-    fontSize: 15,
-  },
-  messageInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderTopWidth: 1,
+  input: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 8,
+    height: 120,
+    textAlignVertical: 'top',
+    fontSize: 16,
+    color: '#333',
+    borderWidth: 1,
     borderColor: '#ccc',
-    paddingTop: 5,
   },
-  messageInput: {
-    flex: 1,
-    height: 40,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    color: '#000',
+  submitButton: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 15,
   },
-  sendButton: {
-    backgroundColor: 'orange',
-    borderRadius: 20,
-    padding: 10,
-    marginLeft: 5,
-    marginRight: 5,
+  submitText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
+
+export default HelpScreen;
