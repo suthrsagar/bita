@@ -61,13 +61,13 @@ const AddRoomScreen = () => {
 
       <TextInput
         style={styles.input}
-        placeholder="Room Name"
+        placeholder="Owner Name"
         value={roomName}
         onChangeText={setRoomName}
       />
       <TextInput
         style={styles.input}
-        placeholder="Price per night"
+        placeholder="Price per month"
         keyboardType="numeric"
         value={price}
         onChangeText={setPrice}

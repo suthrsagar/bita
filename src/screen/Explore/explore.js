@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,24 +9,52 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RoomHomeScreen({ route }) {
   const [roomList, setRoomList] = useState([]);
   const navigation = useNavigation();
 
+  // पुराने रूम लोड करें जब स्क्रीन पहली बार खुले
+  useEffect(() => {
+    const loadRooms = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('rooms');
+        if (stored) {
+          setRoomList(JSON.parse(stored));
+        }
+      } catch (e) {
+        console.error('Error loading saved rooms:', e);
+      }
+    };
+    loadRooms();
+  }, []);
+
+  // जब नया रूम आए तो उसे लिस्ट और स्टोरेज में जोड़ें
   useFocusEffect(
     useCallback(() => {
       const newRoom = route.params?.newRoom;
+
+      const saveRooms = async (rooms) => {
+        try {
+          await AsyncStorage.setItem('rooms', JSON.stringify(rooms));
+        } catch (e) {
+          console.error('Failed to save rooms:', e);
+        }
+      };
 
       if (newRoom) {
         const alreadyExists = roomList.some(
           (room) => room.name === newRoom.name && room.image === newRoom.image
         );
+
         if (!alreadyExists) {
-          setRoomList((prev) => [newRoom, ...prev]);
+          const updatedRooms = [newRoom, ...roomList];
+          setRoomList(updatedRooms);
+          saveRooms(updatedRooms);
         }
       }
-    }, [route.params?.newRoom])
+    }, [route.params?.newRoom, roomList])
   );
 
   return (
@@ -75,9 +103,9 @@ function RoomList({ data }) {
       {data.map((room, index) => (
         <View key={index} style={styles.roomCard}>
           <Image source={{ uri: room.image }} style={styles.roomImage} />
-          <Text style={styles.roomName}>{room.name}</Text>
+          <Text style={styles.roomName}> Owner Name: {room.name} </Text>
           <Text style={styles.roomCapacity}>{room.quantity}</Text>
-          <Text style={styles.roomPrice}>₹{room.price}/night</Text>
+          <Text style={styles.roomPrice}>₹{room.price}/month</Text>
         </View>
       ))}
     </ScrollView>
@@ -123,7 +151,7 @@ const styles = StyleSheet.create({
   },
   roomImage: {
     width: '100%',
-    height: 150,
+    height: 250,
     borderRadius: 8,
     resizeMode: 'cover',
   },
