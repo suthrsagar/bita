@@ -1,180 +1,145 @@
 import React, { useState } from 'react';
 import {
+  ScrollView,
   View,
-  Image,
+  Text,
+  TextInput,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Text,
+  Image,
+  Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { useNavigation } from '@react-navigation/native';
 
-export default function AppHeader() {
-  const [selectedImage, setSelectedImage] = useState(null);
+const AddRoomScreen = () => {
+  const [roomName, setRoomName] = useState('');
+  const [price, setPrice] = useState('');
+  const [location, setLocation] = useState('');
+  const [capacity, setCapacity] = useState('');
+  const [description, setDescription] = useState('');
+  const [images, setImages] = useState([]);
+  const navigation = useNavigation();
 
-  const pickImageFromGallery = () => {
-    const options = {
-      mediaType: 'photo',
-      selectionLimit: 1,
-    };
-
-    launchImageLibrary(options, response => {
-      if (!response.didCancel && !response.errorCode && response.assets?.length > 0) {
-        setSelectedImage(response.assets[0].uri);
+  const pickImages = () => {
+    launchImageLibrary({ mediaType: 'photo', selectionLimit: 5 }, (response) => {
+      if (!response.didCancel && !response.errorCode) {
+        const selected = response.assets.map((asset) => asset.uri);
+        setImages([...images, ...selected]);
       }
     });
   };
 
+  const handleSubmit = () => {
+    if (!roomName || !price || !location || !capacity || !description || images.length === 0) {
+      Alert.alert('Validation', 'Please fill all fields and add at least one photo');
+      return;
+    }
+
+    const newRoom = {
+      name: roomName,
+      quantity: `${capacity} Persons`,
+      price: parseInt(price),
+      discountPrice: parseInt(price), // for compatibility
+      image: images[0], // using the first image
+    };
+
+    navigation.navigate('Explore', { newRoom });
+
+    // Reset form
+    setRoomName('');
+    setPrice('');
+    setLocation('');
+    setCapacity('');
+    setDescription('');
+    setImages([]);
+  };
+
   return (
-    <View style={styles.container}>
-    
-      <View style={styles.header}>
-        <Image
-          source={require('../../../assets/images/logo1.png')} style={styles.logo}
-          resizeMode="contain"
-        />
-        <View style={styles.iconContainer}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Icon name="help-circle-outline" size={27} color="orange" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Icon name="notifications-outline" size={27} color="orange" />
-          </TouchableOpacity>
-        </View>
-      </View>
+    <ScrollView style={styles.container}>
+      <Text style={styles.header}>Add New Room</Text>
 
-      
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        <View style={styles.postContainer}>
-          <Text style={styles.postTitle}>Create a Post</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Room Name"
+        value={roomName}
+        onChangeText={setRoomName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Price per night"
+        keyboardType="numeric"
+        value={price}
+        onChangeText={setPrice}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Location"
+        value={location}
+        onChangeText={setLocation}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Capacity"
+        keyboardType="numeric"
+        value={capacity}
+        onChangeText={setCapacity}
+      />
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        placeholder="Description"
+        multiline
+        value={description}
+        onChangeText={setDescription}
+      />
 
-          <TextInput
-            placeholder="Post Title"
-            style={styles.postInput}
-            placeholderTextColor="#888"
-          />
+      <TouchableOpacity style={styles.uploadButton} onPress={pickImages}>
+        <Text style={styles.uploadButtonText}>📸 Add Room Photos</Text>
+      </TouchableOpacity>
 
-          <TextInput
-            placeholder="What's on your mind?"
-            multiline
-            numberOfLines={4}
-            style={[styles.postInput, { height: 100, textAlignVertical: 'top' }]}
-            placeholderTextColor="#888"
-          />
-
-         
-          <TouchableOpacity style={styles.uploadButton} onPress={pickImageFromGallery}>
-            <Icon name="image-outline" size={20} color="white" />
-            <Text style={styles.uploadText}>Choose Image</Text>
-          </TouchableOpacity>
-
-          {selectedImage && (
-            <Image
-              source={{ uri: selectedImage }}
-              style={{ width: '100%', height: 200, marginTop: 10, borderRadius: 10 }}
-            />
-          )}
-
-         
-          <TouchableOpacity style={styles.submitButton}>
-            <Text style={styles.submitText}>Post</Text>
-          </TouchableOpacity>
-        </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageContainer}>
+        {images.map((uri, index) => (
+          <Image key={index} source={{ uri }} style={styles.image} />
+        ))}
       </ScrollView>
-    </View>
-  );
-}
 
- 
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitText}>Submit Room</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+};
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: {
-    height: 60,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 10,
+  container: { padding: 20, backgroundColor: '#f9f9f9' },
+  header: { fontSize: 24, fontWeight: '700', marginBottom: 20, textAlign: 'center' },
+  input: {
     backgroundColor: '#fff',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    zIndex: 10,
-  },
-  logo: { width: 120, height: 55 },
-  iconContainer: { flexDirection: 'row' },
-  iconButton: { marginLeft: 15 },
-  scrollContent: { paddingTop: 10, paddingBottom: 30 },
-  inputRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    marginTop: 10,
-  },
-  inputWrapper: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: 'gray',
-    borderWidth: 2,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#fff',
-    marginRight: 10,
-  },
-  inputIcon: { marginRight: 8 },
-  textInput: { flex: 1, height: 40, color: 'black' },
-  postContainer: {
-    marginTop: 20,
-    marginHorizontal: 15,
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  postTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#333',
-  },
-  postInput: {
+    padding: 14,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 6,
-    padding: 10,
-    fontSize: 16,
-    marginBottom: 15,
-    backgroundColor: '#fff',
-    color: '#000',
+    marginBottom: 12,
   },
+  textArea: { height: 100, textAlignVertical: 'top' },
   uploadButton: {
-    flexDirection: 'row',
+    backgroundColor: '#2196F3',
+    padding: 14,
+    borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: 'orange',
-    padding: 10,
-    borderRadius: 6,
-    justifyContent: 'center',
-    marginBottom: 15,
+    marginBottom: 10,
   },
-  uploadText: {
-    color: '#fff',
-    marginLeft: 10,
-    fontWeight: '500',
-  },
+  uploadButtonText: { color: '#fff', fontSize: 16 },
+  imageContainer: { flexDirection: 'row', marginBottom: 10 },
+  image: { width: 80, height: 80, borderRadius: 8, marginRight: 10 },
   submitButton: {
-    backgroundColor: '#008CBA',
-    padding: 12,
-    borderRadius: 6,
+    backgroundColor: '#4CAF50',
+    padding: 16,
+    borderRadius: 8,
     alignItems: 'center',
+    marginTop: 20,
   },
-  submitText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  submitText: { color: '#fff', fontSize: 18, fontWeight: '600' },
 });
+
+export default AddRoomScreen;
